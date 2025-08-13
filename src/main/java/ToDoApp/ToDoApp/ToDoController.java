@@ -1,8 +1,7 @@
 package ToDoApp.ToDoApp;
 
-import ToDoApp.ToDo;
-import ToDoApp.ToDoService;
-import ToDoApp.ToDo;
+import ToDoApp.ToDoApp.ToDo;
+import ToDoApp.ToDoApp.ToDoService;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -24,12 +23,12 @@ public class ToDoController {
     }
 
     @PostMapping
-    public String addToDo(@RequestBody ToDo name) {
+    public String addToDo(@RequestBody String name) {
         return toDoService.addToDo(name);
     }
 
-    @PutMapping
-    public String updateToDo(@RequestBody ToDo id) {
+    @PutMapping("/{id}")
+    public String updateToDo(@PathVariable int id) {
         return toDoService.updateToDo(id);
     }
 
