@@ -1,46 +1,44 @@
 package ToDoApp.ToDoApp;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-//showToDo
-//addToDo
-//deleteToDo
-//updateToDo - completed czy tak czy nie
 public class ToDoService {
-   public List<ToDo> listToDo=new ArrayList<ToDo>();
-   private int id=0;
 
-   public List<ToDo> showToDo(){
-       return listToDo;
-   }
+    @Autowired
+    public ToDoRepository toDoRepository;
 
-    public String addToDo(String name){
-       ToDo task=new ToDo(id,name,false);
-       id++;
-       listToDo.add(task);
-       return "Task added";
-    }
-    public boolean deleteToDo(int id){
-        return listToDo.removeIf(toDo -> toDo.getId()==id);
+    public List<ToDo> showToDo() {
+        return toDoRepository.findAll();
     }
 
+    public String addToDo(String name) {
+        ToDo task = new ToDo(name, false);
+        toDoRepository.save(task);
+        return "Task added";
+    }
+
+    public boolean deleteToDo(int id) {
+        if (toDoRepository.existsById(id)) {
+            toDoRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 
     public String updateToDo(int id) {
-        for (ToDo existingToDo : listToDo) {
-            if (existingToDo.getId() == id) {
-                existingToDo.setCompleted(true);
-                return "Task Updated";
-            }
+        ToDo existingToDo = toDoRepository.findById(id).orElse(null);
+        if (existingToDo != null) {
+            existingToDo.setCompleted(true);
+            toDoRepository.save(existingToDo);
+            return "Task Updated";
         }
         return "ID not found";
     }
-    
-
-
 }
 
 

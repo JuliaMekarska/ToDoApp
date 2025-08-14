@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8"> 
+    <meta charset="UTF-8">
     <title>ToDo App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             font-size: 50px;
             margin: 20px;
-        
+
         }
         input, button {
             margin: 5px;
@@ -73,7 +73,7 @@
 
             todos.forEach(todo => {
                 const li = document.createElement("li");
-                li.textContent = `${todo.task}`;
+                li.textContent = `${todo.name}`;
                 if (todo.completed) li.classList.add("completed");
 
                 const completeBtn = document.createElement("button");
