@@ -35,12 +35,10 @@ public class ToDoService {
                 existingToDo.setCompleted(true);
                 return "Task Updated";
             }
-            else{
-                return "ID not found";
-            }
         }
-        return "h";
+        return "ID not found";
     }
+    
 
 
 }

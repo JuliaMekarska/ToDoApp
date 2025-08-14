@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8"> 
+    <title>ToDo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 50px;
+            margin: 20px;
+        
+        }
+        input, button {
+            margin: 5px;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+        .contents {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .addButton {
+            background-color: rgb(83, 170, 247);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.5s ease, background-color 0.5s ease;
+        }
+
+        .addButton:hover{
+            transform: scale(1.3);
+            background-color: rgb(140, 169, 194);
+        }
+
+        #taskInput {
+            width: 200px;
+            height: 50px;
+            border-radius: 25px;
+        }
+
+        input::placeholder {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="contents">
+        <h1>ToDo App</h1>
+
+        <div class="field">
+            <input class="textField" type="text" id="taskInput" placeholder="New task">
+            <button class="addButton" onclick="addToDo()">Dodaj</button>
+        </div>
+
+        <ul id="todoList"></ul>
+    </div>
+    <script>
+        const API_URL = "/api/todo";
+
+        async function loadToDos() {
+            const res = await fetch(API_URL);
+            const todos = await res.json();
+            const list = document.getElementById("todoList");
+            list.innerHTML = "";
+
+            todos.forEach(todo => {
+                const li = document.createElement("li");
+                li.textContent = `${todo.task}`;
+                if (todo.completed) li.classList.add("completed");
+
+                const completeBtn = document.createElement("button");
+                completeBtn.textContent = "✔";
+                completeBtn.onclick = () => updateToDo(todo.id);
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "🗑";
+                deleteBtn.onclick = () => deleteToDo(todo.id);
+
+                li.appendChild(completeBtn);
+                li.appendChild(deleteBtn);
+
+                list.appendChild(li);
+            });
+        }
+
+        async function addToDo() {
+            const task = document.getElementById("taskInput").value;
+            if (!task.trim()) return;
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(task)
+            });
+            document.getElementById("taskInput").value = "";
+            loadToDos();
+        }
+
+        async function updateToDo(id) {
+            await fetch(`${API_URL}/${id}`, { method: "PUT" });
+            loadToDos();
+        }
+
+        async function deleteToDo(id) {
+            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+            loadToDos();
+        }
+
+        loadToDos();
+    </script>
+</body>
+</html>
