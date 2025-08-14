@@ -1,0 +1,164 @@
+package ToDoApp.ToDoApp;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ToDoRepository extends JpaRepository<ToDo, Integer> {
+}
+
+4. Uaktualnienie klasy ToDo
+
+Klasa ToDo musi teraz być encją JPA, więc dodajemy odpowiednie adnotacje:
+
+package ToDoApp.ToDoApp;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class ToDo {
+
+    @Id
+    private int id;
+    private String name;
+    private boolean completed;
+
+    public ToDo(String name, boolean completed) {
+        this.name = name;
+        this.completed = completed;
+    }
+
+    // Gettery i Settery
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+}
+
+package ToDoApp.ToDoApp;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+@SpringBootTest
+public class ToDoServiceTest {
+
+    @Autowired
+    private ToDoService toDoService;
+
+    @Autowired
+    private ToDoRepository toDoRepository;
+
+    @BeforeEach
+    public void setUp() {
+        // Wyczyść bazę danych przed każdym testem
+        toDoRepository.deleteAll();
+    }
+
+    @Test
+    public void testAddToDo() {
+        // Given
+        String taskName = "Test Task";
+
+        // When
+        String response = toDoService.addToDo(taskName);
+
+        // Then
+        assertEquals("Task added", response);
+        List<ToDo> tasks = toDoService.showToDo();
+        assertEquals(1, tasks.size());
+        assertEquals(taskName, tasks.get(0).getName());
+        assertFalse(tasks.get(0).isCompleted());
+    }
+
+    @Test
+    public void testShowToDo() {
+        // Given
+        toDoService.addToDo("Task 1");
+        toDoService.addToDo("Task 2");
+
+        // When
+        List<ToDo> tasks = toDoService.showToDo();
+
+        // Then
+        assertEquals(2, tasks.size());
+        assertEquals("Task 1", tasks.get(0).getName());
+        assertEquals("Task 2", tasks.get(1).getName());
+    }
+
+    @Test
+    public void testDeleteToDo() {
+        // Given
+        toDoService.addToDo("Task to delete");
+        int taskId = toDoService.showToDo().get(0).getId();
+
+        // When
+        boolean result = toDoService.deleteToDo(taskId);
+
+        // Then
+        assertTrue(result);
+        assertEquals(0, toDoService.showToDo().size());
+    }
+
+    @Test
+    public void testDeleteToDo_IfTaskNotFound() {
+        // Given
+        int nonExistingId = 999;
+
+        // When
+        boolean result = toDoService.deleteToDo(nonExistingId);
+
+        // Then
+        assertFalse(result);
+    }
+
+    @Test
+    public void testUpdateToDo() {
+        // Given
+        toDoService.addToDo("Task to update");
+        int taskId = toDoService.showToDo().get(0).getId();
+
+        // When
+        String response = toDoService.updateToDo(taskId);
+
+        // Then
+        assertEquals("Task Updated", response);
+        assertTrue(toDoService.showToDo().get(0).isCompleted());
+    }
+
+    @Test
+    public void testUpdateToDo_IfTaskNotFound() {
+        // Given
+        int nonExistingId = 999;
+
+        // When
+        String response = toDoService.updateToDo(nonExistingId);
+
+        // Then
+        assertEquals("ID not found", response);
+    }
+}
+
