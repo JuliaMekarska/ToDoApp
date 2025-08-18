@@ -48,5 +48,12 @@ footer {
     text-align: center;
     padding: 3px;
     display: block;
+    background-color: #ffe4c4;
+}
+
+header {
+    text-align: center;
+    padding: 3px;
+    display: block;
     background-color: bisque;
 }
