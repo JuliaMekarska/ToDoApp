@@ -14,10 +14,10 @@ public class DataLoader {
         return args -> {
             if (typeRepo.count() == 0) {
                 typeRepo.saveAll(List.of(
-                        new Type(0, "Work", null),
-                        new Type(0, "Personal", null),
-                        new Type(0, "Shopping", null),
-                        new Type(0, "Study", null)
+                        new Type(null, "Work", List.of()),
+                        new Type(null, "Personal", List.of()),
+                        new Type(null, "Shopping", List.of()),
+                        new Type(null, "Study", List.of())
                 ));
             }
         };

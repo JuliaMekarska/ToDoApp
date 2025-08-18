@@ -3,53 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>ToDo App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 20px;
-            margin: 20px;
-        }
-        input, button, select {
-            margin: 5px;
-        }
-        .completed {
-            text-decoration: line-through;
-            color: gray;
-        }
-        .contents {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .addButton {
-            background-color: rgb(83, 170, 247);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 15px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-        .addButton:hover{
-            transform: scale(1.1);
-            background-color: rgb(140, 169, 194);
-        }
-        #taskInput {
-            width: 200px;
-            height: 30px;
-            border-radius: 10px;
-            padding-left: 10px;
-        }
-        .type-block {
-            margin: 15px 0;
-        }
-        .type-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="contents">
@@ -58,7 +12,7 @@
     <div class="field">
         <input class="textField" type="text" id="taskInput" placeholder="New task">
         <select id="typeSelect"></select>
-        <button class="addButton" onclick="addToDo()">Dodaj</button>
+        <button class="addButton" onclick="addToDo()">Add Task</button>
     </div>
 
     <div id="todoContainer"></div>

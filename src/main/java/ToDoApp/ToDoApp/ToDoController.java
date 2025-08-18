@@ -1,7 +1,5 @@
 package ToDoApp.ToDoApp;
 
-import ToDoApp.ToDoApp.ToDo;
-import ToDoApp.ToDoApp.ToDoService;
 import org.springframework.web.bind.annotation.*;
 
 
