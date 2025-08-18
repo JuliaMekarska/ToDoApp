@@ -17,98 +17,79 @@
 
     <div id="todoContainer"></div>
 </div>
+<footer>
+    <p>Authors: Mati, Ania & Jula<br>
+    <a href="https://wallpapers.com/images/file/cute-cat-pictures-gnxzfakjiaymdck3.jpg">cool cat</a></p>
+</footer>
 <script>
     const TODO_API = "/api/todo";
     const TYPE_API = "/api/type";
-
-    async function loadTypes() {
-        const res = await fetch(TYPE_API);
-        const types = await res.json();
-        const select = document.getElementById("typeSelect");
-        select.innerHTML = "";
-        types.forEach(t => {
-            const option = document.createElement("option");
-            option.value = t.id;
-            option.textContent = t.name;
-            select.appendChild(option);
+    
+    function loadTypes() {
+      fetch(TYPE_API)
+        .then(res => res.json())
+        .then(types => {
+          const select = document.getElementById("typeSelect");
+          select.innerHTML = types.map(t => `<option value="${t.id}">${t.name}</option>`).join("");
         });
     }
-
-    async function loadToDos() {
-        const res = await fetch(TODO_API);
-        const todos = await res.json();
-        const container = document.getElementById("todoContainer");
-        container.innerHTML = "";
-
-        // grupowanie po typie
-        const grouped = {};
-        todos.forEach(todo => {
-            const typeName = todo.type ? todo.type.name : "Bez typu";
-            if (!grouped[typeName]) grouped[typeName] = [];
-            grouped[typeName].push(todo);
+    
+    function loadToDos() {
+      fetch(TODO_API)
+        .then(res => res.json())
+        .then(todos => {
+          const container = document.getElementById("todoContainer");
+          container.innerHTML = "";
+          const grouped = {};
+          todos.forEach(t => {
+            const type = t.type ? t.type.name : "Bez typu";
+            if (!grouped[type]) grouped[type] = [];
+            grouped[type].push(t);
+          });
+          for (const type in grouped) {
+            const tasks = grouped[type];
+            container.innerHTML += `
+              <div class="type-block">
+                <div class="type-title">${type}</div>
+                <ul>
+                  ${tasks.map(task => `
+                    <li class="${task.completed ? "completed" : ""}">
+                      ${task.name}
+                      <button onclick="updateToDo(${task.id})">✔</button>
+                      <button onclick="deleteToDo(${task.id})">🗑</button>
+                    </li>
+                  `).join("")}
+                </ul>
+              </div>
+            `;
+          }
         });
-
-        for (const [typeName, tasks] of Object.entries(grouped)) {
-            const block = document.createElement("div");
-            block.classList.add("type-block");
-
-            const title = document.createElement("div");
-            title.classList.add("type-title");
-            title.textContent = typeName;
-            block.appendChild(title);
-
-            const ul = document.createElement("ul");
-            tasks.forEach(todo => {
-                const li = document.createElement("li");
-                li.textContent = `${todo.name}`;
-                if (todo.completed) li.classList.add("completed");
-
-                const completeBtn = document.createElement("button");
-                completeBtn.textContent = "✔";
-                completeBtn.onclick = () => updateToDo(todo.id);
-
-                const deleteBtn = document.createElement("button");
-                deleteBtn.textContent = "🗑";
-                deleteBtn.onclick = () => deleteToDo(todo.id);
-
-                li.appendChild(completeBtn);
-                li.appendChild(deleteBtn);
-
-                ul.appendChild(li);
-            });
-
-            block.appendChild(ul);
-            container.appendChild(block);
-        }
     }
-
-    async function addToDo() {
-        const task = document.getElementById("taskInput").value;
-        const typeId = document.getElementById("typeSelect").value;
-        if (!task.trim()) return;
-        await fetch(TODO_API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                name: task,
-                completed: false,
-                type: { id: typeId }
-            })
-        });
+    
+    function addToDo() {
+      const task = document.getElementById("taskInput").value.trim();
+      const typeId = document.getElementById("typeSelect").value;
+      if (!task) return;
+      fetch(TODO_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: task, completed: false, type: { id: typeId } })
+      }).then(() => {
         document.getElementById("taskInput").value = "";
         loadToDos();
+      });
     }
-
-    async function updateToDo(id) {
-        await fetch(`${TODO_API}/${id}`, { method: "PUT" });
-        loadToDos();
+    
+    function updateToDo(id) {
+      fetch(`${TODO_API}/${id}`, { method: "PUT" })
+        .then(() => loadToDos());
     }
-
-    async function deleteToDo(id) {
-        await fetch(`${TODO_API}/${id}`, { method: "DELETE" });
-        loadToDos();
+    
+    function deleteToDo(id) {
+      fetch(`${TODO_API}/${id}`, { method: "DELETE" })
+        .then(() => loadToDos());
     }
-
+    
     loadTypes();
     loadToDos();
 </script>
