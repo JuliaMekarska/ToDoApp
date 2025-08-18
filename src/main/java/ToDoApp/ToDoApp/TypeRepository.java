@@ -2,4 +2,5 @@ package ToDoApp.ToDoApp;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ToDoRepository extends JpaRepository<ToDo, Integer> {}
+public interface TypeRepository extends JpaRepository<Type, Integer> {}
+

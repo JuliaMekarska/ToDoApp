@@ -10,31 +10,38 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/todo")
 public class ToDoController {
+    private final ToDoRepository todoRepo;
+    private final TypeRepository typeRepo;
 
-    public final ToDoService toDoService;
-
-    public ToDoController(ToDoService toDoService) {
-        this.toDoService = toDoService;
+    public ToDoController(ToDoRepository todoRepo, TypeRepository typeRepo) {
+        this.todoRepo = todoRepo;
+        this.typeRepo = typeRepo;
     }
 
     @GetMapping
-    public List<ToDo> showToDo() {
-        return toDoService.showToDo();
+    public List<ToDo> getAll() {
+        return todoRepo.findAll();
     }
 
     @PostMapping
-    public String addToDo(@RequestBody String name) {
-        return toDoService.addToDo(name);
+    public ToDo create(@RequestBody ToDo todo) {
+        if (todo.getType() != null) {
+            var type = typeRepo.findById(todo.getType().getId())
+                               .orElseThrow(() -> new RuntimeException("Type not found"));
+            todo.setType(type);
+        }
+        return todoRepo.save(todo);
     }
 
     @PutMapping("/{id}")
-    public String updateToDo(@PathVariable int id) {
-        return toDoService.updateToDo(id);
+    public ToDo toggle(@PathVariable int id) {
+        var todo = todoRepo.findById(id).orElseThrow();
+        todo.setCompleted(!todo.isCompleted());
+        return todoRepo.save(todo);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteToDo(@PathVariable int id) {
-        boolean deleted = toDoService.deleteToDo(id);
-        return deleted ? "Task deleted" : "Task not found";
+    public void delete(@PathVariable int id) {
+        todoRepo.deleteById(id);
     }
 }

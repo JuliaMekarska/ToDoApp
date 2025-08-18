@@ -6,11 +6,10 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 50px;
+            font-size: 20px;
             margin: 20px;
-
         }
-        input, button {
+        input, button, select {
             margin: 5px;
         }
         .completed {
@@ -23,7 +22,6 @@
             justify-content: center;
             align-items: center;
         }
-
         .addButton {
             background-color: rgb(83, 170, 247);
             color: white;
@@ -32,46 +30,81 @@
             border-radius: 15px;
             font-size: 16px;
             cursor: pointer;
-            transition: transform 0.5s ease, background-color 0.5s ease;
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
-
         .addButton:hover{
-            transform: scale(1.3);
+            transform: scale(1.1);
             background-color: rgb(140, 169, 194);
         }
-
         #taskInput {
             width: 200px;
-            height: 50px;
-            border-radius: 25px;
+            height: 30px;
+            border-radius: 10px;
+            padding-left: 10px;
         }
-
-        input::placeholder {
-            margin-left: 20px;
+        .type-block {
+            margin: 15px 0;
+        }
+        .type-title {
+            font-weight: bold;
+            margin-bottom: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="contents">
-        <h1>ToDo App</h1>
+<div class="contents">
+    <h1>ToDo App</h1>
 
-        <div class="field">
-            <input class="textField" type="text" id="taskInput" placeholder="New task">
-            <button class="addButton" onclick="addToDo()">Dodaj</button>
-        </div>
-
-        <ul id="todoList"></ul>
+    <div class="field">
+        <input class="textField" type="text" id="taskInput" placeholder="New task">
+        <select id="typeSelect"></select>
+        <button class="addButton" onclick="addToDo()">Dodaj</button>
     </div>
-    <script>
-        const API_URL = "/api/todo";
 
-        async function loadToDos() {
-            const res = await fetch(API_URL);
-            const todos = await res.json();
-            const list = document.getElementById("todoList");
-            list.innerHTML = "";
+    <div id="todoContainer"></div>
+</div>
+<script>
+    const TODO_API = "/api/todo";
+    const TYPE_API = "/api/type";
 
-            todos.forEach(todo => {
+    async function loadTypes() {
+        const res = await fetch(TYPE_API);
+        const types = await res.json();
+        const select = document.getElementById("typeSelect");
+        select.innerHTML = "";
+        types.forEach(t => {
+            const option = document.createElement("option");
+            option.value = t.id;
+            option.textContent = t.name;
+            select.appendChild(option);
+        });
+    }
+
+    async function loadToDos() {
+        const res = await fetch(TODO_API);
+        const todos = await res.json();
+        const container = document.getElementById("todoContainer");
+        container.innerHTML = "";
+
+        // grupowanie po typie
+        const grouped = {};
+        todos.forEach(todo => {
+            const typeName = todo.type ? todo.type.name : "Bez typu";
+            if (!grouped[typeName]) grouped[typeName] = [];
+            grouped[typeName].push(todo);
+        });
+
+        for (const [typeName, tasks] of Object.entries(grouped)) {
+            const block = document.createElement("div");
+            block.classList.add("type-block");
+
+            const title = document.createElement("div");
+            title.classList.add("type-title");
+            title.textContent = typeName;
+            block.appendChild(title);
+
+            const ul = document.createElement("ul");
+            tasks.forEach(todo => {
                 const li = document.createElement("li");
                 li.textContent = `${todo.name}`;
                 if (todo.completed) li.classList.add("completed");
@@ -87,33 +120,43 @@
                 li.appendChild(completeBtn);
                 li.appendChild(deleteBtn);
 
-                list.appendChild(li);
+                ul.appendChild(li);
             });
-        }
 
-        async function addToDo() {
-            const task = document.getElementById("taskInput").value;
-            if (!task.trim()) return;
-            await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(task)
-            });
-            document.getElementById("taskInput").value = "";
-            loadToDos();
+            block.appendChild(ul);
+            container.appendChild(block);
         }
+    }
 
-        async function updateToDo(id) {
-            await fetch(`${API_URL}/${id}`, { method: "PUT" });
-            loadToDos();
-        }
-
-        async function deleteToDo(id) {
-            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-            loadToDos();
-        }
-
+    async function addToDo() {
+        const task = document.getElementById("taskInput").value;
+        const typeId = document.getElementById("typeSelect").value;
+        if (!task.trim()) return;
+        await fetch(TODO_API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: task,
+                completed: false,
+                type: { id: typeId }
+            })
+        });
+        document.getElementById("taskInput").value = "";
         loadToDos();
-    </script>
+    }
+
+    async function updateToDo(id) {
+        await fetch(`${TODO_API}/${id}`, { method: "PUT" });
+        loadToDos();
+    }
+
+    async function deleteToDo(id) {
+        await fetch(`${TODO_API}/${id}`, { method: "DELETE" });
+        loadToDos();
+    }
+
+    loadTypes();
+    loadToDos();
+</script>
 </body>
 </html>

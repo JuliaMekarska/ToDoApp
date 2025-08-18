@@ -1,10 +1,8 @@
 package ToDoApp.ToDoApp;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.*;
 
 @Entity
 public class ToDo {
@@ -12,16 +10,21 @@ public class ToDo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private String name;
     private boolean completed;
-    public ToDo(){
 
-    }
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    @JsonIgnoreProperties("taskList")
+    private Type type;
+
+    public ToDo() {}
+
     public ToDo(String name, boolean completed) {
         this.name = name;
         this.completed = completed;
     }
-
 
     public int getId() {
         return id;
@@ -45,5 +48,13 @@ public class ToDo {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }
